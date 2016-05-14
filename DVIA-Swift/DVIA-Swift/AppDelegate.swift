@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if urlString.rangeOfString("/call_number/").location == NSNotFound {
             let param:NSDictionary = self.getParameters(url)
             if param.objectForKey("phone") != nil {
-                let alert = UIAlertController(title: "Phone", message: "Calling \(param.objectForKey("phone")) without any verification! Ring Ring!!", preferredStyle: UIAlertControllerStyle.ActionSheet)
+                let alert = UIAlertController(title: "Phone", message: "Calling \(param.objectForKey("phone")) without any verification! Ring Ring!!!", preferredStyle: UIAlertControllerStyle.ActionSheet)
                 alert.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
                 self.window?.rootViewController?.presentViewController(alert, animated: true, completion: nil)
             }
