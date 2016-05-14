@@ -8,20 +8,61 @@
 
 import UIKit
 import CoreData
+import Parse
+import Flurry_iOS_SDK
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        // Override point for customization after application launch.
+        UINavigationBar.appearance().setBackgroundImage(UIImage(named: "header-bg"), forBarMetrics: .Default)
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
+        Parse.setApplicationId(kParseAppId, clientKey: kParseClientKey)
+        Flurry.startSession(kFlurrySession)
+        GAI.sharedInstance().trackerWithTrackingId(kGATrackingID)
+        self.fetchTutorials()
         return true
     }
+    
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
+        let urlString: NSString = url.absoluteString
+        if urlString.rangeOfString("/call_number/").location == NSNotFound {
+            let param:NSDictionary = self.getParameters(url)
+            if param.objectForKey("phone") != nil {
+                let alert = UIAlertController(title: "Phone", message: "Calling \(param.objectForKey("phone")) without any verification! Ring Ring!!", preferredStyle: UIAlertControllerStyle.ActionSheet)
+                alert.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+                self.window?.rootViewController?.presentViewController(alert, animated: true, completion: nil)
+            }
+            return true
+        }
+        return false
+    }
 
+    func getParameters(url: NSURL) -> NSDictionary {
+        let parameters:NSMutableDictionary = NSMutableDictionary()
+        let urlString:String = url.absoluteString
+        let components:Array = urlString.componentsSeparatedByString("?")
+        let query:String = components.lastObject()
+        let queryElments: Array = query.componentsSeparatedByString("&")
+        for elements in queryElments {
+            let keyVal = elements.componentsSeparatedByString("=")
+            if keyVal.count > 0 {
+                let variableKey:String? = keyVal[0]
+                let value = (keyVal.count == 2) ? keyVal.lastObject() : nil
+                if (variableKey != nil && value != nil) {
+                    parameters.setObject(value, forKey: variableKey!)
+                }
+            }
+        }
+        
+        return parameters
+    }
+    
     func applicationWillResignActive(application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming p
+        //(Phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     }
 
@@ -105,6 +146,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 abort()
             }
         }
+    }
+    
+    func fetchTutorials() {
+        let query: PFQuery = PFQuery(className:"Tutorials")
+        // Retrieve the object by id
+        query.getObjectInBackgroundWithId("K4VnZubvAs", block: {(tutorials: PFObject?, error: NSError?) -> Void in
+            Model.sharedModel().tutorials = tutorials
+            NSNotificationCenter.defaultCenter().postNotificationName("Tutorials_Loaded", object: self)
+        })
     }
 
 }

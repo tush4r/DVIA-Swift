@@ -1,0 +1,7 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '9.2'
+use_frameworks!
+
+pod 'Parse'
+pod ‘Flurry-iOS-SDK/FlurrySDK’
+pod 'Google/Analytics'
