@@ -23,7 +23,7 @@ extension Array {
         if !self.isEmpty {
             lastItem = self[self.count-1]
         }
-        
+    
         return lastItem
     }
 }
